@@ -1,11 +1,14 @@
 import { StatusBar } from "expo-status-bar";
-import { Platform, StyleSheet, Image, ActivityIndicator, Alert } from "react-native";
+import { Platform, StyleSheet, Image, ActivityIndicator, Alert, TouchableOpacity } from "react-native";
 
 import { View, Text } from "../components/Themed";
 import { AntDesign } from "@expo/vector-icons";
 import CustomButton from "../components/CustomButton";
 import { gql, useQuery, useMutation } from "@apollo/client";
 import { useUserId } from "@nhost/react";
+import { useChatContext } from "../context/ChatContext";
+import { useNavigation } from "@react-navigation/native";
+import React from "react";
 
 const GetEvent = gql`
   query GetEvent($id: uuid!) {
@@ -47,8 +50,24 @@ export default function ModalScreen({ route }) {
   const userId = useUserId()
   const { data, loading, error } = useQuery(GetEvent, {variables: {id}});
   const event = data?.Event_by_pk;
+  const navigation = useNavigation();
+
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => false, // Скрыть кнопку возврата назад
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={() => navigation.navigate("TabOne")} // Перейти на вкладку "TabOne"
+        >
+          <AntDesign name="close" size={24} color={"black"} />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
   
   const [doJoinEvent] = useMutation(JoinEvent);
+
+  const {joinEventChatRoom} = useChatContext();
 
   const onJoin = async () => {
     try {
@@ -112,8 +131,10 @@ export default function ModalScreen({ route }) {
         </View>
 
         {!joined ? (
-          <CustomButton text="Join the event" onPress={onJoin} /> 
-        ) : null}
+          <CustomButton text="Join the event" onPress={onJoin} />
+        ) : (
+          <CustomButton text="Join the conversation" type="SECONDARY" onPress={() => joinEventChatRoom(event)} />
+        )}
       </View>
 
       {/* Use a light status bar on iOS to account for the black space above the modal */}

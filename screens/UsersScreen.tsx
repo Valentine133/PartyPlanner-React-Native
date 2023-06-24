@@ -1,5 +1,4 @@
 import { Text, FlatList, ActivityIndicator } from "react-native";
-import users from "../assets/data/users.json";
 import UserListItem from "../components/UserListItem";
 import { gql, useQuery } from "@apollo/client";
 

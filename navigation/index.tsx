@@ -3,7 +3,7 @@
  * https://reactnavigation.org/docs/getting-started
  *
  */
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   NavigationContainer,
@@ -22,7 +22,7 @@ import ModalScreen from "../screens/ModalScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
 import TabOneScreen from "../screens/TabOneScreen";
 import TabTwoScreen from "../screens/TabTwoScreen";
-import UsersScreen from "../screens/UsersScreen";
+// import UsersScreen from "../screens/UsersScreen";
 import {
   RootStackParamList,
   RootTabParamList,
@@ -30,6 +30,9 @@ import {
 } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
 import { useAuthenticationStatus } from "@nhost/react";
+import ChatStackNavigator from "./ChatStackNavigator";
+import ChatContextProvider from "../context/ChatContext";
+import ModalAddEventScreen from "../screens/ModalAddEventScreen";
 
 export default function Navigation({
   colorScheme,
@@ -77,22 +80,32 @@ function RootNavigator() {
   }
 
   return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="Root"
-        component={BottomTabNavigator}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="NotFound"
-        component={NotFoundScreen}
-        options={{ title: "Oops!" }}
-      />
-      <Stack.Group screenOptions={{ presentation: "modal" }}>
-        <Stack.Screen name="Modal" component={ModalScreen} />
-        <Stack.Screen name="Users" component={UsersScreen} />
-      </Stack.Group>
-    </Stack.Navigator>
+    <ChatContextProvider>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Root"
+          component={BottomTabNavigator}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ModalAddEvent"
+          component={ModalAddEventScreen}
+          options={{ title: "Add Event" }}
+        />
+        <Stack.Screen
+          name="NotFound"
+          component={NotFoundScreen}
+          options={{ title: "Oops!" }}
+        />
+        <Stack.Group screenOptions={{ presentation: "modal" }}>
+          <Stack.Screen
+            name="Modal"
+            component={ModalScreen}
+            options={{ title: "Event" }}
+          />
+        </Stack.Group>
+      </Stack.Navigator>
+    </ChatContextProvider>
   );
 }
 
@@ -116,17 +129,17 @@ function BottomTabNavigator() {
         name="TabOne"
         component={TabOneScreen}
         options={({ navigation }: RootTabScreenProps<"TabOne">) => ({
-          title: "Tab One",
+          title: "Home",
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
           headerRight: () => (
             <Pressable
-              onPress={() => navigation.navigate("Users")}
+              onPress={() => navigation.navigate("TabTwo")}
               style={({ pressed }) => ({
                 opacity: pressed ? 0.5 : 1,
               })}
             >
               <FontAwesome
-                name="users"
+                name="user"
                 size={25}
                 color={"dimgray"}
                 style={{ marginRight: 15 }}
@@ -136,11 +149,21 @@ function BottomTabNavigator() {
         })}
       />
       <BottomTab.Screen
-        name="TabTwo"
+        name="Chat"
+        component={ChatStackNavigator}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="chatbox-ellipses-outline" size={25} color={color} />
+          ),
+        }}
+      />
+      <BottomTab.Screen
+        name="Profile"
         component={TabTwoScreen}
         options={{
-          title: "Tab Two",
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: "Profile",
+          tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
         }}
       />
     </BottomTab.Navigator>
